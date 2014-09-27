@@ -1,0 +1,4 @@
+CoreDC
+======
+
+Core Dancraft plugin
