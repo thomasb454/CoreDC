@@ -1,0 +1,5 @@
+name: CoreDC
+main: net.dancraft.coredc.Main
+version: 1.0
+
+commands:
