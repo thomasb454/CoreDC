@@ -1,5 +1,7 @@
 package net.dancraft.coredc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -17,10 +19,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -31,6 +35,8 @@ public class Main extends JavaPlugin implements Listener {
 
 	public static Main plugin;
 
+	public static ArrayList<Material> ores = new ArrayList<Material>();
+
 	public void onEnable() {
 		plugin = this;
 		FileConfiguration config = plugin.getConfig();
@@ -40,6 +46,7 @@ public class Main extends JavaPlugin implements Listener {
 		saveConfig();
 		Vault.runVault();
 		updateScoreboard();
+		oresGen();
 	}
 
 	public void onDisable() {
@@ -51,10 +58,26 @@ public class Main extends JavaPlugin implements Listener {
 			@SuppressWarnings({ "unchecked", "unused" })
 			public void run() {
 				for (Player p : Bukkit.getOnlinePlayers()) {
-					((Scoreboard) p.getMetadata("Scoreboard").get(0).value()).getPage(0).setValue("Money", Vault.economy.getBalance(p));
+					drawScoreboard(p);
 				}
 			}
 		}.runTaskTimer(this, 0, 100);
+	}
+
+	public void oresGen() {
+		ores.addAll(Arrays.asList(Material.GOLD_ORE, Material.REDSTONE_ORE, Material.LAPIS_ORE, Material.STONE, Material.IRON_ORE, Material.GOLD_ORE, Material.DIAMOND, Material.EMERALD));
+	}
+
+	@EventHandler
+	public void breakBlock(BlockBreakEvent e) {
+		Block block = e.getBlock();
+		if (ores.contains(block.getType())) {
+			int blockId = block.getTypeId();
+			e.getBlock().setType(Material.AIR);
+			Player player = e.getPlayer();
+			e.setCancelled(true);
+			player.getInventory().addItem(new ItemStack(blockId));
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -66,9 +89,11 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void playerAnvil(PlayerInteractEvent e) {
-		if (e.getClickedBlock().getType() == Material.ANVIL) {
-			Block block = e.getClickedBlock();
+		Block block = e.getClickedBlock();
+		if (block.getType() == Material.ANVIL) {
 			block.setData((byte) 0);
+		} else {
+
 		}
 	}
 
@@ -93,6 +118,10 @@ public class Main extends JavaPlugin implements Listener {
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
+		drawScoreboard(player);
+	}
+
+	public void drawScoreboard(Player player) {
 		Scoreboard s = new Scoreboard(player, 40);
 		player.setMetadata("Scoreboard", new FixedMetadataValue(plugin, s));
 		s.addPage(new Scoreboard.Page(0, ChatColor.translateAlternateColorCodes('&', "&a&lPRISON")));
