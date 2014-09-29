@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="E:/DANCRAFT/spigot-1.7.10-R0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="E:/DANCRAFT/MassiveCore.jar"/>
 	<classpathentry kind="lib" path="E:/DANCRAFT/Factions.jar"/>
+	<classpathentry kind="lib" path="E:/DANCRAFT/Vault-1.4.1.jar"/>
+	<classpathentry kind="lib" path="E:/DANCRAFT/DCPrison.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

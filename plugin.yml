@@ -1,5 +1,6 @@
 name: CoreDC
 main: net.dancraft.coredc.Main
+depend: [DCPrison]
 version: 1.0
 
 commands:

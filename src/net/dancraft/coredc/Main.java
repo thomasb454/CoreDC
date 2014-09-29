@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.dancraft.dcprison.API;
+import net.dancraft.dcprison.Rank;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -19,6 +21,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
@@ -29,7 +32,12 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.massivecraft.factions.entity.Board;
+import com.massivecraft.factions.entity.BoardColls;
+import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.UPlayer;
+import com.massivecraft.factions.listeners.FactionsListenerMain;
+import com.massivecraft.massivecore.ps.PS;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -42,10 +50,11 @@ public class Main extends JavaPlugin implements Listener {
 		FileConfiguration config = plugin.getConfig();
 		this.getServer().getPluginManager().registerEvents(this, this);
 		config.addDefault("Factions.State", false);
+		config.addDefault("Prison.State", false);
 		config.options().copyDefaults(true);
 		saveConfig();
 		Vault.runVault();
-		updateScoreboard();
+		// updateScoreboard();
 		oresGen();
 	}
 
@@ -84,16 +93,16 @@ public class Main extends JavaPlugin implements Listener {
 	@EventHandler
 	public void playerChat(AsyncPlayerChatEvent e) {
 		Player player = e.getPlayer();
-		e.setFormat(ChatColor.translateAlternateColorCodes('&', getFaction(player) + "&7" + e.getPlayer().getName() + "&a: &7" + e.getMessage()));
+		e.setFormat(ChatColor.translateAlternateColorCodes('&', getPrisonRank(player) + getFaction(player) + getRankChat(player) + "&7" + e.getPlayer().getName() + "&a: &7" + e.getMessage()));
 	}
 
 	@EventHandler
 	public void playerAnvil(PlayerInteractEvent e) {
-		Block block = e.getClickedBlock();
-		if (block.getType() == Material.ANVIL) {
-			block.setData((byte) 0);
-		} else {
-
+		if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+			Block block = e.getClickedBlock();
+			if (block.getType() == Material.ANVIL) {
+				block.setData((byte) 0);
+			}
 		}
 	}
 
@@ -112,22 +121,42 @@ public class Main extends JavaPlugin implements Listener {
 		} else {
 			return message;
 		}
+	}
 
+	public String getPrisonRank(Player player) {
+		String message = "";
+		FileConfiguration config = plugin.getConfig();
+		if (config.getBoolean("Prison.State")) {
+			String rank = Rank.getPlayerRank(player).getRankName();
+			message = ChatColor.translateAlternateColorCodes('&', "&a[&7" + rank + "&a] ");
+			return message;
+		} else {
+			return message;
+		}
+	}
+
+	public String getRankChat(Player player) {
+		String message = "";
+		if (player.hasPermission("rank.iron")) {
+			message = ChatColor.translateAlternateColorCodes('&', "&a[&8Iron&a] ");
+		} else if (player.hasPermission("rank.gold")) {
+			message = ChatColor.translateAlternateColorCodes('&', "&a[&6Gold&a] ");
+		} else if (player.hasPermission("rank.diamond")) {
+			message = ChatColor.translateAlternateColorCodes('&', "&a[&3Diamond&a] ");
+		} else if (player.hasPermission("rank.bedrock")) {
+			message = ChatColor.translateAlternateColorCodes('&', "&a[&4Bedrock&a] ");
+		}
+		return message;
 	}
 
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		drawScoreboard(player);
+		// drawScoreboard(player);
 	}
 
 	public void drawScoreboard(Player player) {
-		Scoreboard s = new Scoreboard(player, 40);
-		player.setMetadata("Scoreboard", new FixedMetadataValue(plugin, s));
-		s.addPage(new Scoreboard.Page(0, ChatColor.translateAlternateColorCodes('&', "&a&lPRISON")));
-		s.getPage(0).addNewEntry("01", new Scoreboard.Page.Entry("Username", player.getName()));
-		s.getPage(0).addNewEntry("02", new Scoreboard.Page.Entry("Balance", Vault.economy.getBalance(player)));
-		s.showPage(0);
+
 	}
 
 }
