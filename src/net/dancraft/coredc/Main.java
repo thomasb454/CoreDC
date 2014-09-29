@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import net.dancraft.dcprison.API;
 import net.dancraft.dcprison.Rank;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -152,6 +151,7 @@ public class Main extends JavaPlugin implements Listener {
 	@EventHandler
 	public void playerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
+		Scoreboards.createScoreboard(player);
 		// drawScoreboard(player);
 	}
 
